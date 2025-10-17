@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钟兆琳教授 - 旋转式时间轴</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #4a6572, #344955, #232f34);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin: 20px 0 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h2 {
+            font-size: 1.5rem;
+            font-weight: normal;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .intro h3 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+        
+        .intro p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            color: #2c3e50;
+        }
+        
+        .timeline-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            margin: 40px auto;
+        }
+        
+        .timeline-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.5);
+            z-index: 10;
+            padding: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .timeline-center h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-center p {
+            font-size: 1rem;
+        }
+        
+        .timeline-item {
+            position: absolute;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+            opacity: 0.3;
+            transform: scale(0.9);
+            z-index: 5;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .timeline-item.active {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+            z-index: 6;
+        }
+        
+        .timeline-item h4 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        .timeline-item .year {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .timeline-item p {
+            line-height: 1.5;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+        
+        .photo-item {
+            position: absolute;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            z-index: 5;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            height: 180px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+        
+        .photo-item p {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 20px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            font-weight: bold;
+        }
+        
+        .control-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #2471a3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .control-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .current-position {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin: 40px 0 20px;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .timeline-container {
+                height: 700px;
+            }
+            
+            .timeline-item {
+                width: 200px;
+            }
+            
+            .photo-item {
+                width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>钟兆琳教授</h1>
+        <h2>中国电机之父 - 旋转式时间轴</h2>
+    </div>
+    
+    <div class="intro">
+        <h3>个人生平</h3>
+        <p>钟兆琳教授是中国电机工程的奠基人，被誉为"中国电机之父"。他积极响应西迁号召，带头首批迁往西安，亲自指导学生建设电机实验室，并将个人积蓄捐赠用于购置实验设备。</p>
+        <p>即使年事已高，他仍坚持在西北培养人才，为西安交通大学电机学科奠定基石，是中国工程教育史上的重要人物。</p>
+    </div>
+    
+    <div class="timeline-container">
+        <div class="timeline-center">
+            <h3>钟兆琳</h3>
+            <p>1901-1990</p>
+            <p>中国电机之父</p>
+        </div>
+        
+        <!-- 时间轴项目将通过JavaScript动态添加 -->
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn" id="prev-btn"><i class="fas fa-chevron-left"></i> 上一个</button>
+        <div class="current-position" id="position-display">1 / 7</div>
+        <button class="control-btn" id="next-btn">下一个 <i class="fas fa-chevron-right"></i></button>
+    </div>
+    
+    <div class="footer">
+        <p>致敬钟兆琳教授 - 中国电机工程奠基人</p>
+        <p>© 2023 西安交通大学电机工程学科</p>
+    </div>
+
+    <script>
+        // 时间轴数据
+        const timelineData = [
+            {
+                year: "1901",
+                title: "出生",
+                content: "出生于浙江省德清县",
+                angle: 0,
+                radius: 250
+            },
+            {
+                year: "1923",
+                title: "大学毕业",
+                content: "毕业于上海交通大学电机系",
+                angle: 60,
+                radius: 250
+            },
+            {
+                year: "1927",
+                title: "留学归来",
+                content: "获美国康奈尔大学硕士学位后回国，受聘于上海交通大学任教授",
+                angle: 120,
+                radius: 250
+            },
+            {
+                year: "1932-1945",
+                title: "中国电机之父",
+                content: "主导设计并制造了中国第一台交流发电机和电动机，被誉为'中国电机之父'",
+                angle: 180,
+                radius: 250
+            },
+            {
+                year: "1954",
+                title: "筹建西安部分",
+                content: "受命筹建交通大学（西安部分）并任电机系主任",
+                angle: 240,
+                radius: 250
+            },
+            {
+                year: "1956",
+                title: "西迁西安",
+                content: "9月首批随校西迁，赴西安工作，是西迁教授中的核心代表人物",
+                angle: 300,
+                radius: 250
+            },
+            {
+                year: "照片",
+                title: "钟兆琳教授",
+                content: "教授肖像",
+                angle: 315,
+                radius: 250,
+                isPhoto: true
+            }
+        ];
+
+        const timelineContainer = document.querySelector('.timeline-container');
+        const positionDisplay = document.getElementById('position-display');
+        let currentIndex = 0;
+
+        // 创建时间轴项目
+        function createTimelineItems() {
+            timelineData.forEach((item, index) => {
+                let element;
+                
+                if (item.isPhoto) {
+                    // 创建照片项目
+                    element = document.createElement('div');
+                    element.className = 'photo-item';
+                    element.innerHTML = `
+    <img src="https://so1.360tres.com/dr/220__/t01e176238d566fcfe3.jpg" alt="钟兆琳教授">
+    <p>钟兆琳教授肖像</p>
+`;
+                } else {
+                    // 创建时间轴项目
+                    element = document.createElement('div');
+                    element.className = 'timeline-item';
+                    element.innerHTML = `
+                        <span class="year">${item.year}</span>
+                        <h4>${item.title}</h4>
+                        <p>${item.content}</p>
+                    `;
+                }
+                
+                // 计算位置
+                const radius = item.radius;
+                const angleInRadians = (item.angle * Math.PI) / 180;
+                const x = Math.cos(angleInRadians) * radius;
+                const y = Math.sin(angleInRadians) * radius;
+                
+                element.style.left = `calc(50% + ${x}px)`;
+                element.style.top = `calc(50% + ${y}px)`;
+                element.style.transform = `translate(-50%, -50%) scale(0.9)`;
+                element.dataset.index = index;
+                
+                timelineContainer.appendChild(element);
+            });
+            
+            // 显示第一个项目
+            showItem(currentIndex);
+            updatePositionDisplay();
+        }
+
+        // 显示指定索引的项目
+        function showItem(index) {
+            const items = document.querySelectorAll('.timeline-item, .photo-item');
+            
+            // 隐藏所有项目
+            items.forEach(item => {
+                item.classList.remove('active');
+                item.style.opacity = '0.3';
+                item.style.transform = item.style.transform.replace('scale(1)', 'scale(0.9)');
+            });
+            
+            // 显示当前项目
+            if (items[index]) {
+                items[index].classList.add('active');
+                items[index].style.opacity = '1';
+                items[index].style.transform = items[index].style.transform.replace('scale(0.9)', 'scale(1)');
+            }
+            
+            // 更新按钮状态
+            updateButtonStates();
+        }
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === timelineData.length - 1;
+        }
+
+        // 更新位置显示
+        function updatePositionDisplay() {
+            positionDisplay.textContent = `${currentIndex + 1} / ${timelineData.length}`;
+        }
+
+        // 下一个项目
+        function nextItem() {
+            if (currentIndex < timelineData.length - 1) {
+                currentIndex++;
+                showItem(currentIndex);
+                updatePositionDisplay();
+            }
+        }
+
+        // 上一个项目
+        function prevItem() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showItem(currentIndex);
+                updatePositionDisplay();
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            createTimelineItems();
+            
+            // 添加按钮事件监听
+            document.getElementById('next-btn').addEventListener('click', nextItem);
+            document.getElementById('prev-btn').addEventListener('click', prevItem);
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextItem();
+                } else if (e.key === 'ArrowLeft') {
+                    prevItem();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
